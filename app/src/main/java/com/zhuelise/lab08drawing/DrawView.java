@@ -1,11 +1,13 @@
 package com.zhuelise.lab08drawing;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -17,14 +19,18 @@ import java.util.ArrayList;
 
 public class DrawView extends View {
     Paint paint = new Paint();
+    Canvas canvas = new Canvas();
     int width;
     int height;
-    int dy = 0;
+    int dy1 = 0;
+    int dy2 = 0;
+    int dx = 0;
+    Bitmap flowers;
+    Bitmap fallingFlowers;
 
     public DrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -35,32 +41,35 @@ public class DrawView extends View {
         drawBackground(canvas, paint);
         //draw tree
         drawTree(canvas, paint);
-        //draw flowers
-        dy+=20;
-            //draw flowers on tree
-            for (int k = 0; k < 250; k++) {
+        //draw flowers on tree
+        if(flowers==null) { //only draws flowers if bitmap is empty
+            flowers = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
+            Canvas bGCanvas = new Canvas(flowers);
+            for (int k = 0; k < 300; k++) {
+                int a = (int)(Math.random()*10+1);
                 int x = (int) (Math.random() * (1300) + 400);
-                int y = (int) (Math.random() * (800) + 330) +dy;
-                if (Math.sqrt((790 - x) * (790 - x) + (575 + dy - y) * (575 +dy - y)) < 500 && y>0) {
-                    drawFlower(canvas, paint, x, y);
-                }
-                else if(y>0)
-                    drawFlower(canvas, paint, x, height-(int)(Math.random() * 20 + 1));
+                int y = (int) (Math.random() * (800) + 330);
+                int z = 0;
+                if(a<4) z = 1;
+                if(a>8) z = 2;
+                if (Math.sqrt((790 - x) * (790 - x) + (575 - y) * (575 - y)) < 500 && y > 0) {
+                    drawFlower(bGCanvas, paint, x, y, z);
+                } else if (y > 0)
+                    drawFlower(bGCanvas, paint, x, height - (int) (Math.random() * 20 + 1), z);
             }
-        try {
-            Thread.currentThread().sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
         }
+        canvas.drawBitmap(flowers,0,0,null);
+        //draw falling flowers
+        fallFlower(canvas, paint);
         invalidate();
     }
 
-    private void drawFlower(Canvas canvas, Paint paint, int x, int y) {
+    private void drawFlower(Canvas canvas, Paint paint, int x, int y, int z) {
         paint.setColor(0xffffd6f3);
-        int a = (int)(Math.random()*10+1);
-        if(a<4)
+        if(z==1)
             paint.setColor(0xffffe8f8);
-        if(a>8)
+        if(z==2)
             paint.setColor(0xffedafdb);
         for (int k = 0; k < 5; k++) {
             canvas.save();
@@ -68,11 +77,30 @@ public class DrawView extends View {
             canvas.rotate(72, x, y);
         }
         paint.setColor(0xff536344);
-        if(a<4)
+        if(z==1)
             paint.setColor(0xff7b8c6b);
-        if(a>8)
+        if(z==2)
             paint.setColor(0xff455735);
         canvas.drawCircle(x, y, 5, paint);
+    }
+
+    private void fallFlower(Canvas canvas, Paint paint){
+        dy1 +=2;
+        dy2+=4;
+        if((int)(Math.random() * 5 + 2)>3)
+            dx +=2;
+        else
+            dx-=2;
+        fallingFlowers = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas fCanvas = new Canvas(fallingFlowers);
+        if(566+dy1>0) drawFlower(fCanvas, paint, 450+dx, 566 + dy1, 2);
+        if(633+dy2>0) drawFlower(fCanvas, paint, 398 + dx, 633 + dy2, 3);
+        if(480+dy2>0) drawFlower(fCanvas, paint, 679 + dx, 480 + dy2, 1);
+        if(547+dy2>0) drawFlower(fCanvas, paint, 985 + dx, 547 + dy2, 3);
+        if(433+dy1>0) drawFlower(fCanvas, paint, 876 + dx, 433 + dy1, 1);
+        if(789+dy1>0) drawFlower(fCanvas, paint, 983 + dx, 789 + dy1, 2);
+        if(568+dy1>0) drawFlower(fCanvas, paint, 654 + dx, 568 + dy1, 3);
+        canvas.drawBitmap(fallingFlowers, 0, 0, null);
     }
 
     private void drawBackground(Canvas canvas, Paint paint){
@@ -80,35 +108,35 @@ public class DrawView extends View {
         a.setShader(new LinearGradient(0, 0, width, height, 0xffa1dae6, 0xff8fadcc, Shader.TileMode.MIRROR));
         canvas.drawRect(0, 0, width, height/2, a);
         //make ground
-        paint.setColor(0xffa1e6bd);
-        canvas.drawRect(0, (height) / 2, width, height, paint);
+        a.setShader(new LinearGradient(0, 0, width, height/2, 0xff6fa685, 0xffa1e6bd, Shader.TileMode.MIRROR));
+        canvas.drawRect(0, (height) / 2, width, height, a);
         //make clouds
-        paint.setColor(0xffc9edf5);
-        canvas.drawCircle(0, 200, 75, paint);
-        canvas.drawCircle(75, 250, 75, paint);
-        canvas.drawCircle(190, 260, 100, paint);
-        canvas.drawCircle(270, 300, 75, paint);
-        canvas.drawCircle(300, 330, 75, paint);
-        canvas.drawCircle(360, 350, 75, paint);
-        canvas.drawCircle(440, 370, 50, paint);
-        canvas.drawCircle(100, 300, 75, paint);
-        canvas.drawCircle(200, 330, 75, paint);
-        paint.setColor(0xffbbe5f0);
-        canvas.drawCircle(600, 600, 75, paint);
-        canvas.drawCircle(675, 650, 75, paint);
-        canvas.drawCircle(790, 660, 100, paint);
-        canvas.drawCircle(870, 700, 75, paint);
-        canvas.drawCircle(900, 730, 75, paint);
-        canvas.drawCircle(960, 750, 75, paint);
-        canvas.drawCircle(1040, 770, 50, paint);
-        canvas.drawCircle(700, 700, 75, paint);
-        canvas.drawCircle(800, 730, 75, paint);
-        canvas.drawCircle(550, 640, 50, paint);
-        canvas.drawCircle(520, 680, 50, paint);
-        canvas.drawCircle(570, 700, 75, paint);
+        a.setShader(new RadialGradient(0, 0, 100, 0xffd9f4fa, 0xffc9edf5, Shader.TileMode.MIRROR));
+        canvas.drawCircle(0, 200, 75, a);
+        canvas.drawCircle(75, 250, 75, a);
+        canvas.drawCircle(190, 260, 100, a);
+        canvas.drawCircle(270, 300, 75, a);
+        canvas.drawCircle(300, 330, 75, a);
+        canvas.drawCircle(360, 350, 75, a);
+        canvas.drawCircle(440, 370, 50, a);
+        canvas.drawCircle(100, 300, 75, a);
+        canvas.drawCircle(200, 330, 75, a);
+        a.setShader(new RadialGradient(0, 0, 100, 0xffd9f4fa, 0xffbbe5f0, Shader.TileMode.MIRROR));
+        canvas.drawCircle(600, 600, 75, a);
+        canvas.drawCircle(675, 650, 75, a);
+        canvas.drawCircle(790, 660, 100, a);
+        canvas.drawCircle(870, 700, 75, a);
+        canvas.drawCircle(900, 730, 75, a);
+        canvas.drawCircle(960, 750, 75, a);
+        canvas.drawCircle(1040, 770, 50, a);
+        canvas.drawCircle(700, 700, 75, a);
+        canvas.drawCircle(800, 730, 75, a);
+        canvas.drawCircle(550, 640, 50, a);
+        canvas.drawCircle(520, 680, 50, a);
+        canvas.drawCircle(570, 700, 75, a);
         //make river
-        paint.setColor(0xff6abdc4);
-        canvas.drawRect((width / 2) - 100, height, (width / 2) + 100, height / 2, paint);
+        a.setShader(new LinearGradient(0, 0, width, height/2, 0xffa1dae6, 0xff7abdc4, Shader.TileMode.MIRROR));
+        canvas.drawRect((width / 2) - 100, height, (width / 2) + 100, height / 2, a);
         //left side of river
         Path leftRiver = new Path();
         leftRiver.moveTo((float) ((width / 2) - 100), height / 2);
@@ -116,7 +144,7 @@ public class DrawView extends View {
         leftRiver.lineTo((float) ((width / 4) - 100), height);
         leftRiver.lineTo((float) ((width / 2) - 100), height / 2);
         leftRiver.close();
-        canvas.drawPath(leftRiver, paint);
+        canvas.drawPath(leftRiver, a);
         //right side of river
         Path rightRiver = new Path();
         rightRiver.moveTo((float) ((width / 2) + 100), height / 2);
@@ -124,7 +152,7 @@ public class DrawView extends View {
         rightRiver.lineTo((float) (3 * (width / 4) + 100), height);
         rightRiver.lineTo((float) ((width / 2) + 100), height / 2);
         rightRiver.close();
-        canvas.drawPath(rightRiver, paint);
+        canvas.drawPath(rightRiver, a);
     }
 
     private void drawTree(Canvas canvas, Paint paint){
