@@ -22,8 +22,7 @@ public class DrawView extends View {
     Canvas canvas = new Canvas();
     int width;
     int height;
-    int dy1 = 0;
-    int dy2 = 0;
+    int dy1, dy2, dy3, dy4, dy5, dy6, dy7 = 0;
     int dx = 0;
     Bitmap flowers;
     Bitmap fallingFlowers;
@@ -87,20 +86,41 @@ public class DrawView extends View {
     private void fallFlower(Canvas canvas, Paint paint){
         dy1 +=2;
         dy2+=4;
-        if((int)(Math.random() * 5 + 2)>3)
+        dy3+=2;
+        dy4+=3;
+        dy5+=4;
+        dy6+=2;
+        dy7+=3;
+        if((int)(Math.random() * 6 + 2)>4)
             dx +=2;
         else
             dx-=2;
-        fallingFlowers = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas fCanvas = new Canvas(fallingFlowers);
-        if(566+dy1>0) drawFlower(fCanvas, paint, 450+dx, 566 + dy1, 2);
-        if(633+dy2>0) drawFlower(fCanvas, paint, 398 + dx, 633 + dy2, 3);
-        if(480+dy2>0) drawFlower(fCanvas, paint, 679 + dx, 480 + dy2, 1);
-        if(547+dy2>0) drawFlower(fCanvas, paint, 985 + dx, 547 + dy2, 3);
-        if(433+dy1>0) drawFlower(fCanvas, paint, 876 + dx, 433 + dy1, 1);
-        if(789+dy1>0) drawFlower(fCanvas, paint, 983 + dx, 789 + dy1, 2);
-        if(568+dy1>0) drawFlower(fCanvas, paint, 654 + dx, 568 + dy1, 3);
-        canvas.drawBitmap(fallingFlowers, 0, 0, null);
+        //fallingFlowers = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        //Canvas fCanvas = new Canvas(fallingFlowers);
+        if(dx>70 || dx<-70)
+            dx=0;
+        if(566+dy1>height)
+            dy1=0;
+        drawFlower(canvas, paint, 450+dx, 566 + dy1, 2);
+        if(633+dy2>height)
+            dy2=0;
+        drawFlower(canvas, paint, 398 + dx, 633 + dy2, 3);
+        if(480+dy3>height)
+            dy3=0;
+        drawFlower(canvas, paint, 679 + dx, 480 + dy3, 1);
+        if(547+dy4>height)
+            dy4=0;
+        drawFlower(canvas, paint, 985 + dx, 547 + dy4, 3);
+        if(433+dy5>height)
+            dy5=0;
+        drawFlower(canvas, paint, 876 + dx, 433 + dy5, 1);
+        if(789+dy6>height)
+            dy6=0;
+        drawFlower(canvas, paint, 983 + dx, 789 + dy6, 2);
+        if(568+dy7>height)
+            dy7=0;
+        drawFlower(canvas, paint, 654 + dx, 568 + dy7, 3);
+        //canvas.drawBitmap(fallingFlowers, 0, 0, null);
     }
 
     private void drawBackground(Canvas canvas, Paint paint){
